@@ -1,0 +1,100 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Traits\ApiResponses;
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Resources\UserResource;
+use App\Services\UserService;
+use App\Exceptions\BusinessException;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
+class UserController extends Controller
+{
+    use ApiResponses, AuthorizesRequests;
+
+    public function __construct(protected UserService $service) {}
+
+    public function store(StoreUserRequest $request)
+    {
+        // authorize performed in FormRequest
+        try {
+            $user = $this->service->create($request->validated());
+
+            return $this->created(new UserResource($user));
+        } catch (BusinessException $e) {
+            return $this->error($e->getMessage(), 422);
+        }
+    }
+
+    public function index(Request $request)
+    {
+        $this->authorize('create', \App\Models\User::class); // admin only overview
+
+        $users = $this->service->list($request->only('q'));
+
+        return $this->success(['items' => UserResource::collection($users->items()), 'meta' => [
+            'total' => $users->total(),
+            'per_page' => $users->perPage(),
+            'current_page' => $users->currentPage(),
+        ]]);
+    }
+
+    public function show(int $id)
+    {
+        $this->authorize('create', \App\Models\User::class);
+
+        $user = $this->service->find($id);
+
+        if (! $user) {
+            return $this->error('User not found', 404);
+        }
+
+        return $this->success(new UserResource($user));
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $this->authorize('update', $user);
+        $user = $this->service->find($user->id);
+        if (! $user) {
+            return $this->error('User not found', 404);
+        }
+        $this->service->update($user, $request->all());
+        // Update logic to be implemented
+        return $this->success(new UserResource($user));
+    }
+
+    public function destroy(User $user)
+    {
+        $this->authorize('delete', $user);
+
+        $user = $this->service->find($user->id);
+        if (! $user) {
+            return $this->error('User not found', 404);
+        }
+
+        $this->service->disable($user);
+
+        return $this->success(null, 'User disabled');
+    }
+
+    public function toggleManagerRole(User $user)
+    {
+        // Vérifie que l’utilisateur connecté peut modifier CET utilisateur
+        $this->authorize('update', $user);
+
+        $user = $this->service->find($user->id);
+        if (! $user) {
+            return $this->error('User not found', 404);
+        }
+
+        $user->is_manager = ! $user->is_manager;
+        $user->save();
+
+        return $this->success(new UserResource($user), 'User role updated');
+    }
+}
