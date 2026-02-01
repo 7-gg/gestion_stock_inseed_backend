@@ -11,6 +11,7 @@ use App\Exceptions\BusinessException;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -32,22 +33,28 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $this->authorize('create', \App\Models\User::class); // admin only overview
+        $this->authorize('viewAny', \App\Models\User::class);
 
-        $users = $this->service->list($request->only('q'));
+        $filters = $request->only(['search', 'role', 'page']);
+        $users = $this->service->list($filters);
 
-        return $this->success(['items' => UserResource::collection($users->items()), 'meta' => [
-            'total' => $users->total(),
-            'per_page' => $users->perPage(),
-            'current_page' => $users->currentPage(),
-        ]]);
+        return $this->success([
+            'items' => UserResource::collection($users),
+            'meta' => [
+                'total' => User::count(),
+                'admins' => User::where('is_admin', true)->count(),
+                'managers' => User::where('is_manager', true)->count(),
+                'per_page' => $users->perPage(),
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+            ]
+        ]);
     }
 
-    public function show(int $id)
+
+    public function show(User $user)
     {
         $this->authorize('create', \App\Models\User::class);
-
-        $user = $this->service->find($id);
 
         if (! $user) {
             return $this->error('User not found', 404);
@@ -96,5 +103,28 @@ class UserController extends Controller
         $user->save();
 
         return $this->success(new UserResource($user), 'User role updated');
+    }
+
+    public function allManager()
+    {
+        $managers = User::where('is_manager', true)->get();
+
+        return $this->success(
+            $managers,
+            'Tous les managers'
+        );
+    }
+
+    public function allMovement()
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        $count = $user->createdMovements()->count();
+
+        return $this->success(
+            $count,
+            'Total des mouvements initiés par l’utilisateur connecté'
+        );
     }
 }

@@ -53,7 +53,7 @@ class User extends Authenticatable
     public function stocks()
     {
         return $this->belongsToMany(Stock::class, 'stock_users')
-            ->withPivot('role', 'comment', 'started_at', 'ended_at')
+            ->withPivot('role', 'comment')
             ->withTimestamps();
     }
 
@@ -61,7 +61,6 @@ class User extends Authenticatable
     {
         return $this->stocks()
             ->where('stocks.id', $stockId)
-            ->whereNull('stock_users.ended_at')
             ->exists();
     }
     /**
@@ -99,9 +98,7 @@ class User extends Authenticatable
 
     public function currentStockAssignments()
     {
-        return $this->stockAssignments()
-            ->whereNull('ended_at')
-            ->orWhere('ended_at', '>', now());
+        return $this->stockAssignments();
     }
 
     public function isAdmin(): bool

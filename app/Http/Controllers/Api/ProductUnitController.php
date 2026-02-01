@@ -16,20 +16,22 @@ class ProductUnitController extends Controller
      */
     public function index(Request $request)
     {
-        $filters = $request->only(['q']);
+        // Récupération des filtres depuis la requête
+        $filters = $request->only(['search', 'page']);
 
         $query = ProductUnit::query();
 
-        if (!empty($filters['q'])) {
-            $q = $filters['q'];
-            $query->where(function ($qB) use ($q) {
-                $qB->where('name', 'like', "%$q%");
-            });
+        // Recherche sur le nom de l'unité
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where('name', 'like', "%{$search}%");
         }
 
-        // Ici l'ordre s'applique à toute la requête
-        $query->orderBy('updated_at', 'desc');
+        // Tri : d'abord par mise à jour, puis création
+        $query->orderBy('updated_at', 'desc')
+            ->orderBy('created_at', 'desc');
 
+        // Pagination
         $units = $query->paginate(15);
 
         return $this->success([
@@ -52,10 +54,28 @@ class ProductUnitController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
+        // Vérifier si une unité existe déjà (y compris soft deleted)
+        $unit = ProductUnit::withTrashed()->firstWhere('name', $data['name']);
+
+        if ($unit) {
+            if ($unit->trashed()) {
+                // Restaurer l’unité supprimée
+                $unit->restore();
+                return response()->json($unit, 200); // OK mais déjà existant
+            }
+
+            // L’unité existe déjà
+            return response()->json([
+                'message' => 'Cette unité existe déjà.'
+            ], 409); // 409 = Conflict
+        }
+
+        // Créer une nouvelle unité
         $unit = ProductUnit::create($data);
 
         return response()->json($unit, 201);
     }
+
 
     /**
      * Display the specified resource.

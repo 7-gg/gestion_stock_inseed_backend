@@ -176,17 +176,9 @@ class LoginCodeService
         // Charger les assignments actifs avec leurs stocks
         $user->load([
             'stockAssignments' => function ($query) {
-                $query->whereNull('ended_at')
-                    ->orWhere('ended_at', '>', now())
+                $query
                     ->with(['stock', 'role']) // Charger le stock et le rôle
-                    ->orderBy('started_at', 'desc');
-
-                // $query->where(function ($q) {
-                //     $q->whereNull('ended_at')
-                //         ->orWhere('ended_at', '>', now());
-                // })
-                //     ->with(['stock:id,name,location', 'role:id,role,description'])
-                //     ->orderBy('started_at', 'desc');
+                    ->orderBy('updated_at', 'desc');
             }
         ]);
 

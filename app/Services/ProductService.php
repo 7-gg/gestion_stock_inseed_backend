@@ -24,9 +24,18 @@ class ProductService
     {
         $query = Product::query();
 
-        if (! empty($filters['q'])) {
-            $q = $filters['q'];
-            $query->where('name', 'like', "%$q%");
+        if (! empty($filters['search'])) {
+            $search = $filters['search'];
+
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhereHas('category', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('unit', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
+            });
         }
 
         if (! empty($filters['category_id'])) {
@@ -37,10 +46,13 @@ class ProductService
             $query->where('unit_id', $filters['unit_id']);
         }
 
-        //   charger les relations
-        return $query->with(['creator', 'category', 'unit'])->paginate(15);
-    }
+        // Tri par date de mise à jour décroissante
+        $query->orderBy('updated_at', 'desc');
 
+        return $query
+            ->with(['creator', 'category', 'unit'])
+            ->paginate(15);
+    }
 
     public function find(int $id): ?Product
     {

@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Stock;
-use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 

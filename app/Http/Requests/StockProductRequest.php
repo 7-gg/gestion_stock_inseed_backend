@@ -24,7 +24,6 @@ class StockProductRequest extends FormRequest
         $isPost = $this->isMethod('post');
 
         return [
-            'stock_id'         => $isPost ? 'required|exists:stocks,id' : 'sometimes|exists:stocks,id',
             'product_id'       => $isPost ? 'required|exists:products,id' : 'sometimes|exists:products,id',
             'provider'         => 'nullable|string|max:255',
             'quantity'         => 'required|integer|min:0',

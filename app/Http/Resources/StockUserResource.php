@@ -20,8 +20,6 @@ class StockUserResource extends JsonResource
             'user_id'    => $this->user_id,
             'is_chief'   => $this->is_chief,
             'comment'    => $this->comment,
-            'started_at' => $this->started_at,
-            'ended_at'   => $this->ended_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
 

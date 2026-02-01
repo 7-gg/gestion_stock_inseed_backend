@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\Stock;
 use App\Models\StockMovement;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -14,18 +15,11 @@ class StockMovementPolicy
      * Determine if the user can create a movement.
      * Admin OR chief on the stock.
      */
-    public function create(User $user, $stockId): bool
+    public function create(User $user, Stock $stock): bool
     {
-        if ($user->is_admin) {
-            return true;
-        }
-
-        return $user->stocks()
-            ->where('stocks.id', is_object($stockId) ? $stockId->id : $stockId)
-            ->wherePivot('is_chief', true)
-            ->whereNull('stock_users.ended_at')
-            ->exists();
+        return $user->is_admin || $user->stocks()->where('stocks.id', $stock->id)->exists();
     }
+
 
     /**
      * Determine if the user can view a movement.

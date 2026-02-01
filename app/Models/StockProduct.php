@@ -10,6 +10,7 @@ class StockProduct extends Model
     use HasFactory;
 
     protected $table = 'stock_products';
+    public $timestamps = true;
 
     protected $fillable = [
         'stock_id',

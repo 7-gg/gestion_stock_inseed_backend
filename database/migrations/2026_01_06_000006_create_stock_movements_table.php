@@ -22,7 +22,7 @@ class CreateStockMovementsTable extends Migration
             // pour les sorties de stock
             $table->string('beneficiary')->nullable();
             // la confirmation de réception ou de la livraison
-            $table->foreignId('validated_by')->constrained('users')->restrictOnDelete();
+            $table->foreignId('validated_by')->nullable()->constrained('users')->restrictOnDelete();
             $table->timestamp('validated_at')->nullable();
 
             // Preuves (images, documents)

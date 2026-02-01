@@ -69,7 +69,20 @@ class StockPolicy
         return $user->stocks()
             ->where('stocks.id', $stock->id)
             ->wherePivot('is_chief', true)
-            ->whereNull('stock_users.ended_at')
+            ->exists();
+    }
+
+    /**
+     * Assign product to stock: admin OR manager on the stock.
+     */
+    public function assignProduct(User $user, Stock $stock): bool
+    {
+        if ($user->is_admin) {
+            return true;
+        }
+
+        return $user->stocks()
+            ->where('stocks.id', $stock->id)
             ->exists();
     }
 }

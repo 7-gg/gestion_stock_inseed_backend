@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\StockUser;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 
 class StockUserService
 {
@@ -24,7 +26,37 @@ class StockUserService
 
     public function create(array $data): StockUser
     {
-        return StockUser::create($data);
+        return DB::transaction(function () use ($data) {
+
+            // 1️⃣ Empêcher un user actif deux fois sur le même stock
+            $alreadyActive = StockUser::where('stock_id', $data['stock_id'])
+                ->where('user_id', $data['user_id'])
+                ->lockForUpdate()
+                ->exists();
+
+            if ($alreadyActive) {
+                throw ValidationException::withMessages([
+                    'user_id' => 'Cet utilisateur est déjà affecté à ce stock.',
+                ]);
+            }
+
+            // 2️⃣ Empêcher plusieurs chefs actifs
+            if (!empty($data['is_chief']) && $data['is_chief']) {
+                $chiefExists = StockUser::where('stock_id', $data['stock_id'])
+                    ->where('is_chief', true)
+                    ->lockForUpdate()
+                    ->exists();
+
+                if ($chiefExists) {
+                    throw ValidationException::withMessages([
+                        'is_chief' => 'Ce stock a déjà un responsable actif.',
+                    ]);
+                }
+            }
+
+            // 3️⃣ Création
+            return StockUser::create($data);
+        });
     }
 
     public function update(StockUser $stockUser, array $data): StockUser

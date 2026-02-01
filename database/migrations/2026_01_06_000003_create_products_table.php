@@ -55,6 +55,9 @@ class CreateProductsTable extends Migration
             $table->integer('quantity')->default(0);
             $table->integer('minimum_quantity')->default(0);
 
+            $table->softDeletes();
+            $table->timestamps();
+
             $table->unique(['stock_id', 'product_id']);
         });
     }

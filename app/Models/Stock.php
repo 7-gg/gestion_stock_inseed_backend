@@ -31,7 +31,7 @@ class Stock extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'stock_users')
-            ->withPivot('is_chief', 'comment', 'started_at', 'ended_at')
+            ->withPivot('is_chief', 'comment')
             ->withTimestamps();
     }
 
@@ -62,7 +62,6 @@ class Stock extends Model
     public function currentUsers()
     {
         return $this->users()
-            ->wherePivot('is_chief', false)
-            ->whereNull('stock_users.ended_at');
+            ->wherePivot('is_chief', false);
     }
 }

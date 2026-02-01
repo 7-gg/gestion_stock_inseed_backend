@@ -36,7 +36,8 @@ class StockProductController extends Controller
     /** * Ajouter un produit dans un stock */
     public function store(StockProductRequest $request, Stock $stock)
     {
-        $this->authorize('assign', $stock);
+        $this->authorize('assignProduct', $stock);
+        // il faut ajouter $stock->id a $request->validated()
         $stockProduct = $this->service->create($stock, $request->validated());
         return $this->created(
             new StockProductResource($stockProduct->load(['product', 'stock'])),

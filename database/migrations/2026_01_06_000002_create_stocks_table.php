@@ -37,15 +37,9 @@ class CreateStocksTable extends Migration
             $table->boolean('is_chief')->default(false);
 
             $table->text('comment')->nullable();
-            $table->timestamp('started_at');
-            $table->timestamp('ended_at')->nullable();
 
             $table->timestamps();
-
-            // Indexation pour optimiser les performances de recherche
-            $table->unique(['stock_id', 'user_id', 'started_at'], 'unique_stock_user_role_start');
-            $table->index(['user_id', 'ended_at']); // Pour savoir quels stocks un utilisateur gère actuellement
-            $table->index(['stock_id', 'ended_at']); // Pour savoir qui gère un stock actuellement
+            $table->softDeletes();
         });
     }
 

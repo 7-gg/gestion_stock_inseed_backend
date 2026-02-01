@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\StockMovement;
 use App\Models\StockProduct;
 use Illuminate\Pagination\LengthAwarePaginator;
-
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Service responsible for stock movements and their side-effects on stock_product quantities.
@@ -29,6 +29,8 @@ class StockMovementService
 
     public function create(array $data): StockMovement
     {
+        $data['created_by'] = Auth::id();
+
         return StockMovement::create($data);
     }
 

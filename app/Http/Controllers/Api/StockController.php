@@ -70,4 +70,11 @@ class StockController extends Controller
 
         return $this->success(null, 'Stock deleted');
     }
+
+    public function count()
+    {
+        $data = Stock::count();
+
+        return $this->success($data, 'Stocks count retrieved');
+    }
 }

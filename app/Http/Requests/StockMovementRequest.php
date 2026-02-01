@@ -30,7 +30,6 @@ class StockMovementRequest extends FormRequest
                 'beneficiary'      => ['nullable', 'string', 'max:255'],
                 'proofs'           => ['nullable', 'array'],
                 'comment'          => ['nullable', 'string'],
-                'created_by'       => ['required', 'exists:users,id'],
             ];
         }
 

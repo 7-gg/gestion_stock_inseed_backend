@@ -17,12 +17,27 @@ class UserService
     {
         $query = User::query();
 
-        if (isset($filters['q'])) {
-            $q = $filters['q'];
-            $query->where(fn($qB) => $qB->where('name', 'like', "%$q%")
-                ->orWhere('email', 'like', "%$q%"));
+        // Recherche simple
+        $search = $filters['search'];
+        $query->where(function ($qB) use ($search) {
+            $qB->where('name', 'like', "%$search%")
+                ->orWhere('email', 'like', "%$search%");
+        });
+
+
+        // Filtre rôle
+        if (!empty($filters['role'])) {
+            switch ($filters['role']) {
+                case 'admin':
+                    $query->where('is_admin', true);
+                    break;
+                case 'manager':
+                    $query->where('is_manager', true);
+                    break;
+            }
         }
-        // Ici l'ordre s'applique à toute la requête
+
+        // Tri
         $query->orderBy('updated_at', 'desc');
 
         return $query->paginate(15);

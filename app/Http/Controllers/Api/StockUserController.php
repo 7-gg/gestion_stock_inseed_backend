@@ -23,7 +23,6 @@ class StockUserController extends Controller
         $this->service = $service;
     }
 
-
     /**
      * Display a listing of the resource.
      */
@@ -38,14 +37,13 @@ class StockUserController extends Controller
         );
     }
 
-
     /**
      * Store a newly created resource in storage.
      */
     public function store(StockUserRequest $request)
     {
         $stock = Stock::findOrFail($request->stock_id);
-        $this->authorize('assign', $stock);
+        $this->authorize('assignUser', $stock);
 
         $stockUser = $this->service->create($request->validated());
 
@@ -91,8 +89,6 @@ class StockUserController extends Controller
     {
         $this->authorize('delete', $stockUser);
 
-        $this->service->delete($stockUser);
-
-        return $this->success(null, 'Affectation supprimée', 204);
+        return $this->service->delete($stockUser);
     }
 }

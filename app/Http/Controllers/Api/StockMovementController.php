@@ -14,6 +14,8 @@ use App\Models\StockMovement;
 use App\Models\StockProduct;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class StockMovementController extends Controller
 {
@@ -33,17 +35,29 @@ class StockMovementController extends Controller
         );
     }
 
-    public function store(StockMovementRequest $request)
+    public function store(StockMovementRequest $request, Stock $stock)
     {
-        $this->authorize('create', [$request->user(), $request->stock_product_id]);
+        // 🔹 Log pour voir l'utilisateur connecté
+        Log::info('Authenticated user before authorize', [
+            'user' => Auth::user()
+        ]);
+        $this->authorize('create', $stock);
 
-        $movement = $this->service->create($request->validated());
+        $movement = $this->service->create(
+            array_merge(
+                $request->validated(),
+                ['stock_id' => $stock->id]
+            )
+        );
 
         return $this->created(
-            new StockMovementResource($movement->load(['stockProduct', 'creator', 'validator'])),
+            new StockMovementResource(
+                $movement->load(['stockProduct', 'creator', 'validator'])
+            ),
             'Mouvement créé'
         );
     }
+
 
     public function show(StockMovement $movement)
     {
