@@ -21,13 +21,10 @@ class CreateStockMovementsTable extends Migration
             // $table->json('serial_numbers')->nullable(); // c'est pour identifier specifiquement chaque unité en stock
             // pour les sorties de stock
             $table->string('beneficiary')->nullable();
+            $table->string('beneficiary_email')->nullable();
             // la confirmation de réception ou de la livraison
             $table->foreignId('validated_by')->nullable()->constrained('users')->restrictOnDelete();
             $table->timestamp('validated_at')->nullable();
-
-            // Preuves (images, documents)
-            $table->json('proofs')->nullable();  // liste d'URLs ou chemins de fichiers
-
             // Commentaire
             $table->text('comment')->nullable();
 

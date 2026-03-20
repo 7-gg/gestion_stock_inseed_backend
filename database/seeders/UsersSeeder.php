@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -15,94 +14,135 @@ class UsersSeeder extends Seeder
     public function run(): void
     {
         $users = [
-            // Administrateur
             [
-                'name' => 'Addissa Dapaong',
-                'email' => 'admin@stockapp.com',
-                'phone' => '+33601020304',
+                'name' => 'Monsieur TEKESSI',
+                'email' => 'tekessi@inseed.com',
+                'phone' => null,
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+                'is_manager' => false,
+            ],
+            [
+                'name' => 'Monsieur KOKOUDA',
+                'email' => 'kokouda@inseed.com',
+                'phone' => null,
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+                'is_manager' => false,
+            ],
+            [
+                'name' => 'TETE kossi',
+                'email' => 'tete@inseed.com',
+                'phone' => null,
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+                'is_manager' => false,
+            ],
+            [
+                'name' => 'Kayi DJIBOM',
+                'email' => 'kayi@inseed.com',
+                'phone' => null,
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+                'is_manager' => false,
+            ],
+            [
+                'name' => 'Monsieur FANKEBA',
+                'email' => 'fankeba@inseed.com',
+                'phone' => null,
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+                'is_manager' => false,
+            ],
+            [
+                'name' => 'Monsieur AMANA',
+                'email' => 'amana@inseed.com',
+                'phone' => null,
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+                'is_manager' => false,
+            ],
+            [
+                'name' => 'Monsieur BANAPASSE',
+                'email' => 'banapasse@inseed.com',
+                'phone' => null,
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+                'is_manager' => false,
+            ],
+            [
+                'name' => 'Madame Isabelle',
+                'email' => 'isabelle@inseed.com',
+                'phone' => null,
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+                'is_manager' => true, // Manager selon l'image
+            ],
+            [
+                'name' => 'BEDEMA Prisca',
+                'email' => 'prisca@inseed.com',
+                'phone' => null,
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+                'is_manager' => false,
+            ],
+
+            [
+                'name' => 'Madame ADISSA',
+                'email' => 'ameke7gg@gmail.com', //'manager@adissa.com',
+                'phone' => '+22890010203', // Ajusté en format local si besoin
                 'password' => Hash::make('password123'),
                 'is_admin' => false,
                 'is_manager' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
-
-            // Gestionnaire 1
             [
-                'name' => 'Marie Dupont',
-                'email' => 'marie.dupont@example.com',
-                'phone' => '+33611223344',
+                'name' => 'Monsieur PANACO',
+                'email' => 'manager@panaco.com',
+                'phone' => '+22891122334',
                 'password' => Hash::make('password123'),
                 'is_admin' => false,
                 'is_manager' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
-
-            // Gestionnaire 2
             [
-                'name' => 'Jean Martin',
-                'email' => 'jean.martin@example.com',
+                'name' => 'Monsieur BENESSI',
+                'email' => 'user@benessi.com',
                 'phone' => '+33622334455',
                 'password' => Hash::make('password123'),
                 'is_admin' => false,
-                'is_manager' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'is_manager' => false,
             ],
-
-            // Gestionnaire 3
             [
-                'name' => 'Sophie Leroy',
-                'email' => 'sophie.leroy@example.com',
+                'name' => 'Monsieur LAO-TETA',
+                'email' => 'user@lao-teta.com',
                 'phone' => '+33633445566',
                 'password' => Hash::make('password123'),
                 'is_admin' => false,
-                'is_manager' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'is_manager' => false,
             ],
-
-            // Gestionnaire 4
             [
-                'name' => 'Thomas Bernard',
-                'email' => 'thomas.bernard@example.com',
+                'name' => 'Monsieur GENTRY',
+                'email' => 'user@gentry.com',
                 'phone' => '+33644556677',
                 'password' => Hash::make('password123'),
                 'is_admin' => false,
-                'is_manager' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'is_manager' => false,
             ],
-
-            // Utilisateur standard 1 (non gestionnaire)
             [
-                'name' => 'Alice Dubois',
-                'email' => 'alice.dubois@example.com',
+                'name' => 'Madame FERNANDA',
+                'email' => 'user@fernanda.com',
                 'phone' => '+33655667788',
                 'password' => Hash::make('password123'),
                 'is_admin' => false,
                 'is_manager' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-
-            // Utilisateur standard 2 (non gestionnaire)
-            [
-                'name' => 'Pierre Moreau',
-                'email' => 'pierre.moreau@example.com',
-                'phone' => '+33666778899',
-                'password' => Hash::make('password123'),
-                'is_admin' => false,
-                'is_manager' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
         ];
 
-        // Insérer tous les utilisateurs
         foreach ($users as $userData) {
-            User::create($userData);
+            // updateOrCreate évite de créer des doublons si tu relances le seeder
+            User::updateOrCreate(
+                ['email' => $userData['email']],
+                $userData
+            );
         }
 
         // Message de confirmation

@@ -4,17 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponses;
-use App\Http\Requests\StockMovement\StoreStockMovementRequest;
 use App\Http\Resources\StockMovementResource;
 use App\Models\Stock;
 use App\Services\StockMovementService;
-use App\Exceptions\BusinessException;
 use App\Http\Requests\StockMovementRequest;
 use App\Models\StockMovement;
 use App\Models\StockProduct;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class StockMovementController extends Controller
@@ -24,40 +22,52 @@ class StockMovementController extends Controller
     public function __construct(protected StockMovementService $service) {}
 
 
-    public function index(Request $request, StockProduct $stockProduct)
+    public function index(Request $request)
     {
-        $filters = $request->only(['movement', 'start', 'end']);
-        $movements = $this->service->list($stockProduct, $filters);
+        // On récupère tous les filtres possibles, y compris le produit
+        $filters = $request->only(['movement', 'start', 'end', 'stock_product_id']);
+
+        $movements = $this->service->list($filters);
 
         return $this->success(
             StockMovementResource::collection($movements),
-            'Liste des mouvements du stock'
+            'Liste des mouvements récupérée avec succès'
         );
     }
 
     public function store(StockMovementRequest $request, Stock $stock)
     {
-        // 🔹 Log pour voir l'utilisateur connecté
-        Log::info('Authenticated user before authorize', [
-            'user' => Auth::user()
-        ]);
-        $this->authorize('create', $stock);
+        return DB::transaction(function () use ($request, $stock) {
+            $this->authorize('create', $stock);
 
-        $movement = $this->service->create(
-            array_merge(
-                $request->validated(),
-                ['stock_id' => $stock->id]
-            )
-        );
+            Log::info('StockMovement store : ', $request->all());
 
-        return $this->created(
-            new StockMovementResource(
-                $movement->load(['stockProduct', 'creator', 'validator'])
-            ),
-            'Mouvement créé'
-        );
+            // 1. Création du mouvement
+            $movement = $this->service->create(
+                array_merge($request->validated(), ['stock_id' => $stock->id])
+            );
+
+            // --- SECTION LOGIQUE DE STOCK (Incrémentation) ---
+            $movementValue = $movement->movement instanceof \App\Enums\StockMovementType
+                ? $movement->movement->value
+                : $movement->movement;
+
+            $isEntry = in_array(strtoupper($movementValue), ['ENTREE', 'IN']);
+            $change = $isEntry ? $movement->quantity : -$movement->quantity;
+
+            StockProduct::where('id', $movement->stock_product_id)
+                ->increment('quantity', $change);
+
+            // --- CRUCIAL : Recharger les relations ET les médias avant de retourner ---
+            // On utilise 'media' qui est la relation par défaut de Spatie
+            $movement->load(['stockProduct', 'creator', 'validator', 'media']);
+
+            return $this->created(
+                new StockMovementResource($movement),
+                'Mouvement créé et stock mis à jour'
+            );
+        });
     }
-
 
     public function show(StockMovement $movement)
     {
@@ -88,19 +98,5 @@ class StockMovementController extends Controller
         $this->service->delete($movement);
 
         return $this->success(null, 'Mouvement supprimé', 204);
-    }
-
-    /**
-     * Liste des mouvements d’un produit spécifique dans un stock
-     */
-    public function productMovements(Request $request, StockProduct $stockProduct)
-    {
-        $filters = $request->only(['movement', 'start', 'end']);
-        $movements = $this->service->list($stockProduct, $filters);
-
-        return $this->success(
-            StockMovementResource::collection($movements),
-            'Mouvements du produit dans le stock'
-        );
     }
 }

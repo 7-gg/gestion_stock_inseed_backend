@@ -40,11 +40,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('products', ProductController::class);
     Route::apiResource('stocks', StockController::class);
 
-    // Relations spécifiques aux Stocks
-    Route::prefix('stocks/{stock}')->group(function () {
-        Route::apiResource('users', StockUserController::class);
-        Route::apiResource('products', StockProductController::class);
-        Route::apiResource('movements', StockMovementController::class);
-        Route::get('products/{product}/movements', [StockMovementController::class, 'productMovements']);
+    Route::scopeBindings()->group(function () {
+        Route::prefix('stocks/{stock}')->group(function () {
+            Route::apiResource('users', StockUserController::class)
+                ->parameters([
+                    'users' => 'stockUser'
+                ]);
+        });
     });
+
+    // Relations spécifiques aux Stocks
+    Route::prefix('stocks/{stock}')
+        ->group(function () {
+            Route::apiResource('products', StockProductController::class);
+            Route::apiResource('movements', StockMovementController::class);
+        });
 });

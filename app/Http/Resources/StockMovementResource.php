@@ -17,10 +17,18 @@ class StockMovementResource extends JsonResource
             'beneficiary'  => $this->beneficiary,
             'validated_by' => $this->validated_by,
             'validated_at' => $this->validated_at,
-            'proofs'       => $this->proofs,
             'comment'      => $this->comment,
             'created_by'   => $this->created_by,
             'created_at'   => $this->created_at,
+
+            'files' => $this->getMedia('attachments')->map(function ($media) {
+                return [
+                    'id' => $media->id,
+                    'url' => $media->getFullUrl(),
+                    'name' => $media->file_name,
+                    'mime' => $media->mime_type
+                ];
+            }),
 
             'stock_product' => $this->whenLoaded('stockProduct', function () {
                 return [

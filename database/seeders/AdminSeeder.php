@@ -13,19 +13,17 @@ class AdminSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-
-
     public function run(): void
     {
-        $adminEmail = env('ADMIN_EMAIL');
-        $adminPhone = env('ADMIN_PHONE');
-        $admin_name = env('ADMIN_NAME', 'Administrateur');
+        $adminEmail = config('app.admin_email');
+        $adminPhone = config('app.admin_phone');
+        $adminName  = config('app.admin_name');
 
         if (!$adminEmail) {
             throw new \Exception('ADMIN_EMAIL is not defined in .env');
         }
 
-        DB::transaction(function () use ($adminEmail, $adminPhone, $admin_name) {
+        DB::transaction(function () use ($adminEmail, $adminPhone, $adminName) {
 
             $currentAdmin = DB::table('admin_histories')
                 ->whereNull('ended_at')
@@ -37,8 +35,8 @@ class AdminSeeder extends Seeder
                 if ($currentAdminUser && $currentAdminUser->email === $adminEmail) {
                     // Même admin → mise à jour si nécessaire
                     $updates = [];
-                    if ($currentAdminUser->name !== $admin_name) {
-                        $updates['name'] = $admin_name;
+                    if ($currentAdminUser->name !== $adminName) {
+                        $updates['name'] = $adminName;
                     }
                     if ($currentAdminUser->phone !== $adminPhone) {
                         $updates['phone'] = $adminPhone;
@@ -66,7 +64,7 @@ class AdminSeeder extends Seeder
 
             if (!$admin) {
                 $admin = User::create([
-                    'name'       => 'Administrateur',
+                    'name'       => $adminName,
                     'email'      => $adminEmail,
                     'phone'      => $adminPhone,
                     'is_admin'   => true,

@@ -32,6 +32,7 @@ class Stock extends Model
     {
         return $this->belongsToMany(User::class, 'stock_users')
             ->withPivot('is_chief', 'comment')
+            ->wherePivotNull('deleted_at')
             ->withTimestamps();
     }
 
@@ -39,12 +40,18 @@ class Stock extends Model
     {
         return $this->belongsToMany(Product::class, 'stock_products')
             ->withPivot('provider', 'quantity', 'minimum_quantity')
+            ->wherePivotNull('deleted_at')
             ->withTimestamps();
     }
 
     public function stockProducts()
     {
         return $this->hasMany(StockProduct::class);
+    }
+
+    public function stockUsers()
+    {
+        return $this->hasMany(StockUser::class);
     }
 
     public function stockMovements()
@@ -55,8 +62,7 @@ class Stock extends Model
     public function currentChief()
     {
         return $this->users()
-            ->wherePivot('is_chief', true)
-            ->whereNull('stock_users.ended_at');
+            ->wherePivot('is_chief', true);
     }
 
     public function currentUsers()

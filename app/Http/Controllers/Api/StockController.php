@@ -31,18 +31,18 @@ class StockController extends Controller
 
     public function index(Request $request)
     {
-        $stocks = $this->service->list($request->only('q'));
-
-        // Charger la relation sur la collection
-        $stocks->getCollection()->load('currentUsers');
+        $stocks = $this->service->list(
+            $request->only(['search', 'page'])
+        );
 
         return $this->success([
             'items' => StockResource::collection($stocks->items()),
             'meta' => [
-                'total' => $stocks->total(),
-                'per_page' => $stocks->perPage(),
+                'total'        => $stocks->total(),
+                'per_page'     => $stocks->perPage(),
                 'current_page' => $stocks->currentPage(),
-            ]
+                'last_page'    => $stocks->lastPage(),
+            ],
         ]);
     }
 

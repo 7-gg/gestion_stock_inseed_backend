@@ -26,10 +26,9 @@ class ProductCategoryController extends Controller
         }
 
         // Tri par mise à jour puis création
-        $query->orderBy('updated_at', 'desc')
-            ->orderBy('created_at', 'desc');
+        $query->orderBy('updated_at', 'desc');
 
-        $categories = $query->paginate(15);
+        $categories = $query->paginate(12);
 
         return $this->success([
             'items' => $categories->items(),
@@ -49,6 +48,7 @@ class ProductCategoryController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
         ]);
 
         // Vérifier si une catégorie existe déjà (y compris soft-deleted)
@@ -89,13 +89,13 @@ class ProductCategoryController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
         ]);
 
         $category->update($data);
 
         return $this->success($category);
     }
-
 
     /**
      * Remove the specified resource from storage.

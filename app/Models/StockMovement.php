@@ -5,10 +5,12 @@ namespace App\Models;
 use App\Enums\StockMovementType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class StockMovement extends Model
+class StockMovement extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
 
     protected $table = 'stock_movements';
 
@@ -23,9 +25,9 @@ class StockMovement extends Model
         'quantity',
         'price',
         'beneficiary',
+        'beneficiary_email',
         'validated_by',
         'validated_at',
-        'proofs',
         'comment',
         'created_by',
     ];
@@ -35,9 +37,14 @@ class StockMovement extends Model
         'quantity' => 'integer',
         'price' => 'decimal:2',
         'validated_at' => 'datetime',
-        'proofs' => 'array',
         'created_at' => 'datetime',
     ];
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('attachments')
+            ->useDisk('public'); // ou 's3' selon ta config
+    }
 
     // Relations
 

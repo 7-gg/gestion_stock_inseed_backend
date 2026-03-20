@@ -52,6 +52,7 @@ class StockResource extends JsonResource
                     ];
                 });
             }),
+
             'stock_products' => $this->whenLoaded('stockProducts', function () {
                 return $this->stockProducts->map(function ($sp) {
                     return [

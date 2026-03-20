@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\StockUser;
 use App\Models\User;
-use App\Models\Stock;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class StockUserPolicy

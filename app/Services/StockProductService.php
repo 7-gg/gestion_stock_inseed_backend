@@ -9,13 +9,27 @@ use Illuminate\Support\Facades\DB;
 
 class StockProductService
 {
-    public function list(Stock $stock, array $filters = []): LengthAwarePaginator
+    public function list(Stock $stock, array $filters = [], array $relations = []): LengthAwarePaginator
     {
-        $query = $stock->stockProducts()->with('product');
+        // 1. On initialise la requête avec les relations reçues du contrôleur
+        // 2. On ajoute le tri par date de mise à jour (le plus récent en premier)
+        $query = $stock->stockProducts()
+            ->with($relations)
+            ->orderBy('created_at', 'desc');
+
+        // Filtrage par fournisseur
         if (!empty($filters['provider'])) {
             $query->where('provider', 'like', "%{$filters['provider']}%");
         }
-        return $query->paginate(15);
+
+        // Optionnel : Ajout d'un filtre de recherche par nom de produit si 'search' est présent
+        if (!empty($filters['search'])) {
+            $query->whereHas('product', function ($q) use ($filters) {
+                $q->where('name', 'like', "%{$filters['search']}%");
+            });
+        }
+
+        return $query->paginate(12);
     }
 
     public function create(Stock $stock, array $data): StockProduct
@@ -30,10 +44,5 @@ class StockProductService
             $stockProduct->update($data);
             return $stockProduct;
         });
-    }
-
-    public function delete(StockProduct $stockProduct): bool
-    {
-        return $stockProduct->delete();
     }
 }

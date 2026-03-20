@@ -14,15 +14,13 @@ class ProductCategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Fournitures de bureau', 'description' => 'Papeterie, stylos, et petit matériel de bureau.'],
-            ['name' => 'Matériel Informatique', 'description' => 'Consommables imprimantes, toners, et petits accessoires.'],
-            ['name' => 'Produits d\'entretien', 'description' => 'Produits de nettoyage et hygiène pour les locaux.'],
-            ['name' => 'Mobilier de bureau', 'description' => 'Chaises, lampes et petits mobiliers.'],
-            ['name' => 'Matériel de reprographie', 'description' => 'Rames de papier, reliures et transparents.'],
+            ['name' => 'FOURNITURES DE BUREAU'],
+            ['name' => 'FOURNITURES D’ENTRETIEN'],
+            ['name' => 'FOURNITURES INFORMATIQUES'],
         ];
 
         foreach ($categories as $category) {
-            ProductCategory::create($category);
+            ProductCategory::updateOrCreate(['name' => $category['name']], $category);
         }
     }
 }

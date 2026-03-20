@@ -112,11 +112,12 @@ class ProductController extends Controller
     public function count()
     {
         $data = [
-            'categories' => ProductCategory::count(),
-            'products'   => Product::count(),
-            'units'      => ProductUnit::count(),
-            'allCategories'   => ProductCategory::all(),
-            'allUnits'      => ProductUnit::all(),
+            'categories'     => ProductCategory::count(),
+            'products'       => Product::count(),
+            'units'          => ProductUnit::count(),
+
+            'allCategories'  => ProductCategory::orderBy('updated_at', 'desc')->get(),
+            'allUnits'       => ProductUnit::orderBy('updated_at', 'desc')->get(),
         ];
 
         return $this->success($data, 'Products count retrieved');

@@ -15,14 +15,20 @@ class StockService
 
     public function list(array $filters = []): LengthAwarePaginator
     {
-        return Stock::query()
+        $query = Stock::query();
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        return $query
+            ->with(['users', 'products'])
             ->orderBy('updated_at', 'desc')
-            ->when(!empty($filters['q']), function ($query) use ($filters) {
-                $q = $filters['q'];
-                $query->where('name', 'like', "%{$q}%");
-            })
-            ->paginate(15);
+            ->paginate(12);
     }
+
 
     public function find(int $id): ?Stock
     {

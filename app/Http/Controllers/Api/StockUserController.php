@@ -11,6 +11,7 @@ use App\Services\StockUserService;
 use App\Traits\ApiResponses;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class StockUserController extends Controller
 {
@@ -26,14 +27,20 @@ class StockUserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request, Stock $stock)
     {
-        $filters = $request->only(['stock_id', 'user_id']);
+        // Log::info("StockUserController index pour le Stock ID: {$stock->id}");
+
+        $filters['stock_id'] = $stock->id;
+
         $stockUsers = $this->service->list($filters);
 
         return $this->success(
             StockUserResource::collection($stockUsers),
-            'Liste des affectations'
+            "Liste des utilisateurs du stock : {$stock->name}"
         );
     }
 
@@ -47,12 +54,12 @@ class StockUserController extends Controller
 
         $stockUser = $this->service->create($request->validated());
 
+        $result = $stockUser->load(['stock', 'user']);
         return $this->created(
-            new StockUserResource($stockUser->load(['stock', 'user'])),
+            new StockUserResource($result),
             'Affectation créée'
         );
     }
-
 
     /**
      * Display the specified resource.
@@ -64,7 +71,6 @@ class StockUserController extends Controller
             'Détails de l’affectation'
         );
     }
-
 
     /**
      * Update the specified resource in storage.
@@ -85,10 +91,12 @@ class StockUserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(StockUser $stockUser)
+    public function destroy(Stock $stock, StockUser $stockUser)
     {
         $this->authorize('delete', $stockUser);
 
-        return $this->service->delete($stockUser);
+        $stockUser->delete();
+
+        return $this->success(null, 'Affectation supprimée');
     }
 }

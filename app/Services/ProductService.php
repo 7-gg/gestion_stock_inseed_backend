@@ -51,7 +51,7 @@ class ProductService
 
         return $query
             ->with(['creator', 'category', 'unit'])
-            ->paginate(15);
+            ->paginate(12);
     }
 
     public function find(int $id): ?Product

@@ -28,11 +28,10 @@ class ProductUnitController extends Controller
         }
 
         // Tri : d'abord par mise à jour, puis création
-        $query->orderBy('updated_at', 'desc')
-            ->orderBy('created_at', 'desc');
+        $query->orderBy('updated_at', 'desc');
 
         // Pagination
-        $units = $query->paginate(15);
+        $units = $query->paginate(12);
 
         return $this->success([
             'items' => $units->items(),
@@ -52,6 +51,7 @@ class ProductUnitController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
         ]);
 
         // Vérifier si une unité existe déjà (y compris soft deleted)
@@ -93,6 +93,7 @@ class ProductUnitController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
         ]);
 
         $unit->update($data);

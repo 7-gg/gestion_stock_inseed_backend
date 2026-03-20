@@ -6,22 +6,37 @@ use App\Models\StockUser;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class StockUserService
 {
+
     public function list(array $filters = []): LengthAwarePaginator
     {
         $query = StockUser::query()->with(['stock', 'user']);
 
+        // Filtrage par Stock
         if (!empty($filters['stock_id'])) {
+            // Utilisation de double quotes pour injecter la variable ou concaténation
+            Log::info("Filtrage par stock_id : " . $filters['stock_id']);
+
             $query->where('stock_id', $filters['stock_id']);
         }
 
+        // Filtrage par Utilisateur
         if (!empty($filters['user_id'])) {
+            Log::info("Filtrage par user_id : " . $filters['user_id']);
+
             $query->where('user_id', $filters['user_id']);
         }
+        // OPTIONNEL : Si tu veux FORCER l'affichage de rien du tout si pas de user_id passé
+        // else { $query->whereRaw('1 = 0'); }
 
-        return $query->paginate(15);
+        $results = $query->paginate(12);
+
+        Log::info("Nombre d'affectations trouvées : " . $results->total());
+
+        return $results;
     }
 
     public function create(array $data): StockUser
@@ -67,6 +82,8 @@ class StockUserService
 
     public function delete(StockUser $stockUser): bool
     {
-        return $stockUser->delete();
+        $result = $stockUser->delete();
+
+        return $result === true;
     }
 }

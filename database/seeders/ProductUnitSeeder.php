@@ -14,15 +14,28 @@ class ProductUnitSeeder extends Seeder
     public function run(): void
     {
         $units = [
-            ['name' => 'Pièce', 'description' => 'Unité individuelle'],
-            ['name' => 'Rame', 'description' => 'Paquet de 500 feuilles (papier)'],
-            ['name' => 'Carton', 'description' => 'Conditionnement par boîte'],
-            ['name' => 'Lot', 'description' => 'Ensemble de plusieurs articles'],
-            ['name' => 'Litre', 'description' => 'Pour les produits d\'entretien liquides'],
+            'boite',
+            'unité',
+            'paquet de 5',
+            'paquet',
+            'Carton',
+            'paquet de 100',
+            'Unité',
+            'paquet de 12',
+            'paquet de 6',
+            'Pièce',
+            'paquet de 250',
+            'Boite',
+            'sachet',
+            'Boite de 1 l',
+            'Bidon de 2 litre',
+            'boite de 1l',
+            'jet de 4C',
+            'Jet'
         ];
 
         foreach ($units as $unit) {
-            ProductUnit::create($unit);
+            ProductUnit::updateOrCreate(['name' => $unit]);
         }
     }
 }

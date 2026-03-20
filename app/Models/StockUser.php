@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class StockUser extends Model
 {
-
     use HasFactory, SoftDeletes;
 
     protected $table = 'stock_users';

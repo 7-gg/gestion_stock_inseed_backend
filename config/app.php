@@ -2,6 +2,10 @@
 
 return [
 
+    'admin_email' => env('ADMIN_EMAIL'),
+    'admin_phone' => env('ADMIN_PHONE'),
+    'admin_name' => env('ADMIN_NAME'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Name

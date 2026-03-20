@@ -28,7 +28,9 @@ class StockMovementRequest extends FormRequest
                 'quantity'         => ['required', 'integer', 'min:1'],
                 'price'            => ['nullable', 'numeric', 'min:0'],
                 'beneficiary'      => ['nullable', 'string', 'max:255'],
-                'proofs'           => ['nullable', 'array'],
+                'beneficiary_email' => 'nullable|email',
+                'attachments' => 'nullable|array',
+                'attachments.*' => 'file|mimes:jpg,jpeg,png,pdf,doc,docx,txt|max:5120',
                 'comment'          => ['nullable', 'string'],
             ];
         }
@@ -38,7 +40,9 @@ class StockMovementRequest extends FormRequest
                 'quantity'    => ['sometimes', 'integer', 'min:1'],
                 'price'       => ['nullable', 'numeric', 'min:0'],
                 'beneficiary' => ['nullable', 'string', 'max:255'],
-                'proofs'      => ['nullable', 'array'],
+                'beneficiary_email' => 'nullable|email',
+                'attachments' => 'nullable|array',
+                'attachments.*' => 'file|mimes:jpg,jpeg,png,pdf|max:2048',
                 'comment'     => ['nullable', 'string'],
                 'validated_by' => ['nullable', 'exists:users,id'],
                 'validated_at' => ['nullable', 'date'],
