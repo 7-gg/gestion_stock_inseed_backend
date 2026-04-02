@@ -18,23 +18,23 @@ class StockUserService
         // Filtrage par Stock
         if (!empty($filters['stock_id'])) {
             // Utilisation de double quotes pour injecter la variable ou concaténation
-            Log::info("Filtrage par stock_id : " . $filters['stock_id']);
+            // Log::info("Filtrage par stock_id : " . $filters['stock_id']);
 
             $query->where('stock_id', $filters['stock_id']);
         }
 
         // Filtrage par Utilisateur
         if (!empty($filters['user_id'])) {
-            Log::info("Filtrage par user_id : " . $filters['user_id']);
+            // Log::info("Filtrage par user_id : " . $filters['user_id']);
 
             $query->where('user_id', $filters['user_id']);
         }
         // OPTIONNEL : Si tu veux FORCER l'affichage de rien du tout si pas de user_id passé
         // else { $query->whereRaw('1 = 0'); }
 
-        $results = $query->paginate(12);
+        $results = $query->paginate(4);
 
-        Log::info("Nombre d'affectations trouvées : " . $results->total());
+        // Log::info("Nombre d'affectations trouvées : " . $results->total());
 
         return $results;
     }

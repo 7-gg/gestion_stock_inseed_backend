@@ -54,6 +54,18 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
+        if (!Auth::user()->is_admin) {
+            $hasMovements = $product->stockProducts()->whereHas('movements')->exists();
+
+            if ($hasMovements) {
+                return response()->json([
+                    'message' => 'Impossible de modifier directement ce produit car il
+                     possède un historique de mouvements de stock. Contactez un administrateur
+                     pour effectuer cette modification.'
+                ], 400);
+            }
+        }
+
         $data = $request->validate([
             'name'           => 'sometimes|required|string|max:255',
             'category_id'    => 'nullable|exists:product_categories,id',
@@ -69,6 +81,17 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
+        // Vérifier si le produit a des liens avec des entrées de stock qui possèdent des mouvements
+        // On utilise whereHas pour chercher dans la relation 'stockProducts' puis dans 'movements'
+        $hasMovements = $product->stockProducts()->whereHas('movements')->exists();
+
+        if ($hasMovements) {
+            return response()->json([
+                'message' => 'Impossible de supprimer ce produit car il possède un historique de mouvements de stock.'
+            ], 400);
+        }
+
+        // Si pas de mouvements, on peut supprimer (SoftDelete est utilisé dans vos modèles)
         $this->service->delete($product);
 
         return response()->json(null, 204);
@@ -81,19 +104,19 @@ class ProductController extends Controller
 
         // On commence la requête sur les produits en dessous du minimum
         $query = StockProduct::query()
-            ->whereColumn('quantity', '<', 'minimum_quantity');
+            ->whereColumn('quantity', '<=', 'minimum_quantity');
 
         // Filtre par stocks assignés si ce n'est pas un admin
-        if (! $user->is_admin) {
-            $query->whereHas('stock.users', fn($q) => $q->where('users.id', $user->id));
-        }
+        // if (! $user->is_admin) {
+        //     $query->whereHas('stock.users', fn($q) => $q->where('users.id', $user->id));
+        // }
 
         // On eager load les relations utiles
         $query->with([
-            'product:id,name,category_id,unit_id',
+            'product',
             'product.category:id,name',
             'product.unit:id,name',
-            'stock:id,name,location'
+            'stock'
         ]);
 
         // Pour chaque stock, on prend seulement le produit avec la plus faible quantité relative

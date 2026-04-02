@@ -13,29 +13,37 @@ use Illuminate\Support\Facades\Auth;
  */
 class StockMovementService
 {
-    public function list(array $filters = []): LengthAwarePaginator
+    public function list(array $filters = [])
     {
-        // On part du modèle global pour permettre de voir TOUS les mouvements si besoin
-        $query = StockMovement::query()
-            ->with(['creator', 'validator', 'stockProduct']) // Ajout de stockProduct pour savoir de quel produit il s'agit
-            ->latest('created_at'); // Tri décroissant (DESC)
+        $query = StockMovement::query();
 
-        // Filtre par Produit (si l'ID est fourni)
-        if (!empty($filters['stock_product_id'])) {
-            $query->where('stock_product_id', $filters['stock_product_id']);
-        }
+        // 1. Filtrer par le Stock (via la table intermédiaire stock_products)
+        $query->whereHas('stockProduct', function ($q) use ($filters) {
+            $q->where('stock_id', $filters['stock_id']);
 
-        // Filtre par Type de mouvement (Entrée/Sortie)
-        if (!empty($filters['movement'])) {
-            $query->where('movement', $filters['movement']);
-        }
+            // 2. Filtrer par un produit spécifique si demandé
+            if (!empty($filters['product_id']) && $filters['product_id'] !== 'all') {
+                $q->where('product_id', $filters['product_id']);
+            }
+        });
 
-        // Filtre par Date (Intervalle)
-        if (!empty($filters['start']) && !empty($filters['end'])) {
-            $query->betweenDates($filters['start'], $filters['end']);
-        }
+        // 3. Filtrer par Type (ENTREE/SORTIE)
+        $query->when($filters['type'] ?? null, function ($q, $type) {
+            return $q->where('movement', $type);
+        });
 
-        return $query->paginate(2);
+        // 4. Filtrer par Dates
+        $query->when($filters['start_date'] ?? null, function ($q, $start) {
+            return $q->whereDate('created_at', '>=', $start);
+        });
+
+        $query->when($filters['end_date'] ?? null, function ($q, $end) {
+            return $q->whereDate('created_at', '<=', $end);
+        });
+
+        return $query->with(['stockProduct.product', 'creator', 'validator'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
     }
 
     public function create(array $data): StockMovement
@@ -43,13 +51,17 @@ class StockMovementService
         $data['created_by'] = Auth::id();
 
         // 1. Vérification spécifique pour la SORTIE
-        if ($data['movement'] === 'SORTIE' || $data['movement']->value === 'SORTIE') {
+        // Handle both string and enum cases
+        $movementValue = $data['movement'] instanceof \App\Enums\StockMovementType
+            ? $data['movement']->value
+            : $data['movement'];
+
+        if ($movementValue === 'SORTIE') {
             if (empty($data['beneficiary_email'])) {
                 throw new \InvalidArgumentException("L'email du bénéficiaire est obligatoire pour une sortie.");
             }
 
             // 2. Recherche automatique du validateur par email
-            // On cherche si un utilisateur possède cet email
             $user = User::where('email', $data['beneficiary_email'])->first();
 
             if ($user) {

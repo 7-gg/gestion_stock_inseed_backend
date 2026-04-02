@@ -14,8 +14,50 @@ class UsersSeeder extends Seeder
     public function run(): void
     {
         $users = [
+            // ADMINISTRATEUR
             [
-                'name' => 'Monsieur TEKESSI',
+                'name' => 'Monsieur KOLAGBE',
+                'email' => 'amekecita@gmail.com',
+                'phone' => null,
+                'password' => Hash::make('password123'),
+                'is_admin' => true,
+                'is_manager' => true, // Manager selon l'image
+            ],
+            // MANAGERS
+            [
+                'name' => 'Madame Isabelle Efalo',
+                'email' => 'isa@gmail.com',
+                'phone' => null,
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+                'is_manager' => true, // Manager selon l'image
+            ],
+            [
+                'name' => 'Madame ADISSA',
+                'email' => 'ameke7gg@gmail.com', //'manager@adissa.com',
+                'phone' => '+22890010203', // Ajusté en format local si besoin
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+                'is_manager' => true,
+            ],
+            [
+                'name' => 'Monsieur PANACO',
+                'email' => 'manager@panaco.com',
+                'phone' => '+22891122334',
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+                'is_manager' => true,
+            ],
+            [
+                'name' => 'BEDEMA Prisca',
+                'email' => 'toni0989@gmail.com',
+                'phone' => null,
+                'password' => Hash::make('password123'),
+                'is_admin' => false,
+                'is_manager' => false,
+            ],
+            [
+                'name' => 'Monsieur KEKESSI',
                 'email' => 'tekessi@inseed.com',
                 'phone' => null,
                 'password' => Hash::make('password123'),
@@ -69,39 +111,6 @@ class UsersSeeder extends Seeder
                 'password' => Hash::make('password123'),
                 'is_admin' => false,
                 'is_manager' => false,
-            ],
-            [
-                'name' => 'Madame Isabelle',
-                'email' => 'isabelle@inseed.com',
-                'phone' => null,
-                'password' => Hash::make('password123'),
-                'is_admin' => false,
-                'is_manager' => true, // Manager selon l'image
-            ],
-            [
-                'name' => 'BEDEMA Prisca',
-                'email' => 'prisca@inseed.com',
-                'phone' => null,
-                'password' => Hash::make('password123'),
-                'is_admin' => false,
-                'is_manager' => false,
-            ],
-
-            [
-                'name' => 'Madame ADISSA',
-                'email' => 'ameke7gg@gmail.com', //'manager@adissa.com',
-                'phone' => '+22890010203', // Ajusté en format local si besoin
-                'password' => Hash::make('password123'),
-                'is_admin' => false,
-                'is_manager' => true,
-            ],
-            [
-                'name' => 'Monsieur PANACO',
-                'email' => 'manager@panaco.com',
-                'phone' => '+22891122334',
-                'password' => Hash::make('password123'),
-                'is_admin' => false,
-                'is_manager' => true,
             ],
             [
                 'name' => 'Monsieur BENESSI',

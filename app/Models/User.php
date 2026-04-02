@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use InteractsWithMedia, HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -46,6 +48,13 @@ class User extends Authenticatable
         'login_attempts' => 'integer',
     ];
 
+    // Définir une collection spécifique pour l'avatar
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('avatars')
+            ->singleFile(); // Supprime automatiquement l'ancien fichier si un nouveau arrive
+    }
+
     /**
      * Relations
      */
@@ -53,7 +62,7 @@ class User extends Authenticatable
     public function stocks()
     {
         return $this->belongsToMany(Stock::class, 'stock_users')
-            ->withPivot('role', 'comment')
+            ->withPivot('comment')
             ->withTimestamps();
     }
 
@@ -116,5 +125,18 @@ class User extends Authenticatable
         if ($role === 'admin') return $this->is_admin;
         if ($role === 'manager') return $this->is_manager;
         return false;
+    }
+
+    /**
+     * Récupère tous les mouvements où l'utilisateur est le bénéficiaire (via email)
+     */
+    public function assignedMovements()
+    {
+        return $this->hasMany(StockMovement::class, 'beneficiary_email', 'email');
+    }
+
+    public function assignedMovementsValidated()
+    {
+        return $this->hasMany(StockMovement::class, 'beneficiary_email', 'email')->wherenotnull('validated_at');
     }
 }

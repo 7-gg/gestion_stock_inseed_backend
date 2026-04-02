@@ -27,13 +27,13 @@ class StockMovementPolicy
      */
     public function view(User $user, StockMovement $movement): bool
     {
-        if ($user->is_admin) {
+        if ($user->is_admin || $user->is_manager) {
             return true;
         }
 
         return $user->stocks()
             ->where('stocks.id', $movement->stockProduct->stock_id)
-            ->whereNull('stock_users.ended_at')
+            ->whereNull('stock_users.deleted_at')
             ->exists();
     }
 
@@ -43,14 +43,8 @@ class StockMovementPolicy
      */
     public function validate(User $user, StockMovement $movement): bool
     {
-        if ($user->is_admin) {
-            return true;
-        }
-
-        return $user->stocks()
-            ->where('stocks.id', $movement->stockProduct->stock_id)
-            ->wherePivot('is_chief', true)
-            ->whereNull('stock_users.ended_at')
+        return $movement
+            ->where('beneficiary_email', $movement->beneficiary_email)
             ->exists();
     }
 }

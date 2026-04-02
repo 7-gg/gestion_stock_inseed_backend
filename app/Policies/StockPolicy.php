@@ -15,7 +15,7 @@ class StockPolicy
      */
     public function create(User $user): bool
     {
-        return $user->is_admin;
+        return $user->is_admin || $user->is_manager;
     }
 
     /**
@@ -23,13 +23,13 @@ class StockPolicy
      */
     public function view(User $user, Stock $stock): bool
     {
-        if ($user->is_admin) {
+        if ($user->is_admin || $user->is_manager) {
             return true;
         }
 
         return $user->stocks()
             ->where('stocks.id', $stock->id)
-            ->whereNull('stock_users.ended_at')
+            ->whereNull('stock_users.deleted_at')
             ->exists();
     }
 
@@ -45,7 +45,7 @@ class StockPolicy
         return $user->stocks()
             ->where('stocks.id', $stock->id)
             ->wherePivot('is_chief', true)
-            ->whereNull('stock_users.ended_at')
+            ->whereNull('stock_users.deleted_at')
             ->exists();
     }
 
@@ -62,7 +62,7 @@ class StockPolicy
      */
     public function assignUser(User $user, Stock $stock): bool
     {
-        if ($user->is_admin) {
+        if ($user->is_admin || ($user->is_manager && $user->id === $stock->created_by)) {
             return true;
         }
 

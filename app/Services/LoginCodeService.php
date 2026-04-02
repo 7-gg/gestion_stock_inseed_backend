@@ -40,30 +40,9 @@ class LoginCodeService
                 return false;
             }
 
-            if (!$user->is_admin) {
-                // Vérifier les assignments actives
-                $activeAssignments = $user->stockAssignments()
-                    ->active()
-                    ->count();
-                if ($activeAssignments === 0) {
-                    // Vérifier s'il a des assignments expirées
-                    $expiredAssignments = $user->stockAssignments()
-                        ->where('ended_at', '<=', now())
-                        ->count();
-
-                    Log::warning('User has no active stock assignments', [
-                        'user_id' => $user->id,
-                        'active_assignments' => 0,
-                        'expired_assignments' => $expiredAssignments,
-                        'total_assignments' => $user->stockAssignments()->count(),
-                    ]);
-
-                    return false;
-                }
-            }
-
             // Générer un code à 6 chiffres
             $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            Log::info('code généré : ', ['code' => $code]);
 
             // Hasher le code
             $hashedCode = Hash::make($code);
@@ -177,7 +156,7 @@ class LoginCodeService
         $user->load([
             'stockAssignments' => function ($query) {
                 $query
-                    ->with(['stock', 'role']) // Charger le stock et le rôle
+                    ->with(['stock']) // Charger le stock et le rôle
                     ->orderBy('updated_at', 'desc');
             }
         ]);

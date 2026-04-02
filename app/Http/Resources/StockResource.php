@@ -18,6 +18,11 @@ class StockResource extends JsonResource
             'updated_at' => $this->updated_at,
             'deleted_at' => $this->deleted_at,
 
+            // Statistiques "users_count":1,"products_count":3,"movements_count":13
+            'users_count'     => $this->users_count ?? 0,
+            'products_count'  => $this->products_count ?? 0,
+            'movements_count' => $this->movements_count ?? 0,
+
             // Relations
             'creator' => $this->whenLoaded('creator', function () {
                 return new UserResource($this->creator);
@@ -85,8 +90,6 @@ class StockResource extends JsonResource
             'current_users' => $this->whenLoaded('users', function () {
                 return $this->currentUsers->map(fn($user) => $user->only(['id', 'name', 'email']));
             }),
-
-
         ];
     }
 }

@@ -12,6 +12,7 @@ use App\Models\StockMovement;
 use App\Models\StockProduct;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -21,18 +22,27 @@ class StockMovementController extends Controller
 
     public function __construct(protected StockMovementService $service) {}
 
-
-    public function index(Request $request)
+    public function index(Request $request, Stock $stock) // On a besoin du stockId
     {
-        // On récupère tous les filtres possibles, y compris le produit
-        $filters = $request->only(['movement', 'start', 'end', 'stock_product_id']);
+        // On récupère et on valide les filtres
+        $filters = $request->only([
+            'type',           // 'ENTREE' ou 'SORTIE'
+            'start_date',
+            'end_date',
+            'product_id',    // L'ID du produit sélectionné
+        ]);
+
+        // On ajoute l'ID du stock aux filtres pour que le service sache où chercher
+        $filters['stock_id'] = $stock->id;
 
         $movements = $this->service->list($filters);
 
-        return $this->success(
-            StockMovementResource::collection($movements),
-            'Liste des mouvements récupérée avec succès'
-        );
+        log::info('StockMovement index - résultats : ', ['count' => $movements->total()]);
+
+        // Retourner directement la pagination sans l'envelopper
+        return StockMovementResource::collection($movements)
+            ->response()
+            ->getData(true);
     }
 
     public function store(StockMovementRequest $request, Stock $stock)
@@ -98,5 +108,30 @@ class StockMovementController extends Controller
         $this->service->delete($movement);
 
         return $this->success(null, 'Mouvement supprimé', 204);
+    }
+
+    public function validateMovement(StockMovement $movement)
+    {
+        // 1. Vérifier si l'utilisateur a le droit de valider (via ta Policy)
+        $this->authorize('validate', $movement);
+
+        // 2. Vérifier si ce n'est pas déjà validé pour éviter les doublons
+        if ($movement->validated_at) {
+            return $this->error('Ce mouvement a déjà été validé.', 422);
+        }
+
+        // 3. Mettre à jour les informations de validation
+        $movement->update([
+            'validated_by' => Auth::id(),
+            'validated_at' => now(),
+        ]);
+
+        // 4. Recharger les relations pour la ressource
+        $movement->load(['stockProduct.product', 'stockProduct.stock', 'creator', 'validator']);
+
+        return $this->success(
+            new StockMovementResource($movement),
+            'Mouvement validé avec succès'
+        );
     }
 }

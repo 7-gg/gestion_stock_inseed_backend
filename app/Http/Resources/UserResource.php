@@ -21,6 +21,10 @@ class UserResource extends JsonResource
             'updated_at' => $this->updated_at,
             'deleted_at' => $this->deleted_at,
 
+            'avatar'     => $this->getFirstMediaUrl('avatars') ?: null,
+            'assigned_movements_count' => $this->assigned_movements_count ?? 0,
+            'validated_movements' => $this->assigned_movements_validated_count ?? 0,
+
             // Relations
 
             'stocks' => $this->whenLoaded('stocks', function () {

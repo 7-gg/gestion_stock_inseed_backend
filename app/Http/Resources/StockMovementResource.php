@@ -30,13 +30,7 @@ class StockMovementResource extends JsonResource
                 ];
             }),
 
-            'stock_product' => $this->whenLoaded('stockProduct', function () {
-                return [
-                    'id'   => $this->stockProduct->id,
-                    'stock_id' => $this->stockProduct->stock_id,
-                    'product_id' => $this->stockProduct->product_id,
-                ];
-            }),
+            'stock_product' => new StockProductResource($this->whenLoaded('stockProduct')),
 
             'creator' => $this->whenLoaded('creator', function () {
                 return [
@@ -46,13 +40,7 @@ class StockMovementResource extends JsonResource
                 ];
             }),
 
-            'validator' => $this->whenLoaded('validator', function () {
-                return [
-                    'id'    => $this->validator->id,
-                    'name'  => $this->validator->name,
-                    'email' => $this->validator->email,
-                ];
-            }),
+            'validator' => new UserResource($this->whenLoaded('validator')),
         ];
     }
 }

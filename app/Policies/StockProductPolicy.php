@@ -15,12 +15,12 @@ class StockProductPolicy
      */
     public function viewAny(User $user): bool
     {
-        if ($user->is_admin) {
+        if ($user->is_admin || $user->is_manager) {
             return true;
         }
 
         return $user->stocks()
-            ->whereNull('stock_users.ended_at')
+            ->whereNull('stock_users.deleted_at')
             ->exists();
     }
 
@@ -29,13 +29,13 @@ class StockProductPolicy
      */
     public function view(User $user, StockProduct $stockProduct): bool
     {
-        if ($user->is_admin) {
+        if ($user->is_admin || $user->is_manager) {
             return true;
         }
 
         return $user->stocks()
             ->where('stocks.id', $stockProduct->stock_id)
-            ->whereNull('stock_users.ended_at')
+            ->whereNull('stock_users.deleted_at')
             ->exists();
     }
 
@@ -51,7 +51,7 @@ class StockProductPolicy
         return $user->stocks()
             ->where('stocks.id', $stockProduct->stock_id)
             ->wherePivot('is_chief', true)
-            ->whereNull('stock_users.ended_at')
+            ->whereNull('stock_users.deleted_at')
             ->exists();
     }
 }

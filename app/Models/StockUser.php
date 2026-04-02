@@ -23,6 +23,31 @@ class StockUser extends Model
         'is_chief' => 'boolean',
     ];
 
+
+    /**
+     * Scope pour récupérer uniquement les assignments actives
+     * Une assignment est active si elle n'a pas de date de fin (deleted_at null)
+     * ou si sa date de fin est dans le futur
+     */
+    public function scopeActive($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('deleted_at')
+                ->orWhere('deleted_at', '>', now());
+        });
+    }
+
+    /**
+     * Scope pour récupérer les assignments expirées
+     */
+    public function scopeExpired($query)
+    {
+        return $query->whereNotNull('deleted_at')
+            ->where('deleted_at', '<=', now());
+    }
+
+    // Vos relations existantes...
+
     public function stock()
     {
         return $this->belongsTo(Stock::class);

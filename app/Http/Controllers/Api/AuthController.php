@@ -100,10 +100,12 @@ class AuthController extends Controller
         // Charger les assignments actifs avec leurs stocks
         $user->load([
             'stockAssignments' => function ($query) {
-                $query->with(['stock', 'role']) // Charger le stock et le rôle
+                $query->with(['stock']) // Charger le stock et le rôle
                     ->orderBy('updated_at', 'desc');
             }
         ]);
+        $user->loadCount('assignedMovements', 'assignedMovementsValidated');
+        Log::info($user);
 
         return $this->success(new UserResource($user));
     }

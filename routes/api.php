@@ -20,12 +20,13 @@ Route::prefix('auth')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('me', [AuthController::class, 'me']);
+    Route::get('/assigned-movements', [UserController::class, 'mouvementAssignedToUserConnected']);
     Route::get('users/managers', [UserController::class, 'allManager']);
-    Route::get('users/movements', [UserController::class, 'allMovement']);
 
     // Gestion des Utilisateurs
     Route::apiResource('users', UserController::class);
     Route::post('users/{user}/toggle-role', [UserController::class, 'toggleManagerRole']);
+    Route::post('/auth/avatar', [UserController::class, 'updateAvatar']);
 
     // nombre total de stock
     Route::get('stocks/count', [StockController::class, 'count']);
@@ -55,4 +56,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::apiResource('products', StockProductController::class);
             Route::apiResource('movements', StockMovementController::class);
         });
+
+    Route::post('stock-movements/{movement}/validate', [StockMovementController::class, 'validateMovement']);
+
+    Route::get('export-restock', [StockController::class, 'exportRestock']);
 });

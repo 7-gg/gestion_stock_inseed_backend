@@ -40,7 +40,7 @@ class UserService
         // Tri
         $query->orderBy('updated_at', 'desc');
 
-        return $query->paginate(12);
+        return $query->paginate(6);
     }
 
     public function find(int $id): ?User

@@ -37,6 +37,7 @@ class CreateStockMovementsTable extends Migration
             $table->index(['stock_product_id', 'created_at']);
             $table->index(['movement', 'created_at']);
             $table->index(['stock_product_id', 'movement', 'created_at']);
+            $table->index('beneficiary_email');
         });
     }
 

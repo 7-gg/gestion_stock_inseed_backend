@@ -11,7 +11,6 @@ use App\Services\StockUserService;
 use App\Traits\ApiResponses;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class StockUserController extends Controller
 {

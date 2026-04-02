@@ -10,8 +10,12 @@ use App\Http\Resources\StockResource;
 use App\Services\StockService;
 use App\Models\Stock;
 use App\Exceptions\BusinessException;
+use App\Exports\RestockExport;
+use App\Models\StockProduct;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StockController extends Controller
 {
@@ -34,8 +38,7 @@ class StockController extends Controller
         $stocks = $this->service->list(
             $request->only(['search', 'page'])
         );
-
-        return $this->success([
+        $y = $this->success([
             'items' => StockResource::collection($stocks->items()),
             'meta' => [
                 'total'        => $stocks->total(),
@@ -44,10 +47,20 @@ class StockController extends Controller
                 'last_page'    => $stocks->lastPage(),
             ],
         ]);
+        // Log::info($y);
+        return $y;
     }
 
-    public function show(Stock $stock)
+    public function show(int $id) // On reçoit l'ID (int) et non le modèle (Stock)
     {
+        // On appelle la méthode find du service qui contient maintenant le withCount
+        $stock = $this->service->find($id);
+
+        if (!$stock) {
+            return $this->error("Stock non trouvé", 404);
+        }
+
+        // On vérifie l'autorisation sur l'objet récupéré
         $this->authorize('view', $stock);
 
         return $this->success(new StockResource($stock));
@@ -76,5 +89,23 @@ class StockController extends Controller
         $data = Stock::count();
 
         return $this->success($data, 'Stocks count retrieved');
+    }
+
+    public function exportRestock()
+    {
+        // On récupère TOUS les produits en alerte (pas de groupBy ici)
+        $products = StockProduct::query()
+            ->where(function ($q) {
+                $q->where('quantity', '<=', 'minimum_quantity');
+            })
+            ->with(['product', 'stock'])
+            ->get();
+
+        Log::info($products);
+
+        return Excel::download(
+            new RestockExport($products),
+            'etat_reapprovisionnement_' . now()->format('d_m_Y') . '.xlsx'
+        );
     }
 }
